@@ -1,4 +1,4 @@
-# Definition: apache::vhost
+  # Definition: apache::vhost
 #
 # This class installs Apache Virtual Hosts
 #
@@ -45,7 +45,7 @@ define apache::vhost(
     $options            = $apache::params::options,
     $apache_name        = $apache::params::apache_name,
     $vhost_name         = $apache::params::vhost_name,
-    $logroot            = "/var/log/$apache::params::apache_name"
+    $logroot            = "/var/log/${apache::params::apache_name}"
   ) {
 
   include apache
@@ -70,12 +70,12 @@ define apache::vhost(
     }
   }
 
-  file {"${apache::params::vdir}/${priority}-${name}-$docroot":
+  file {"${apache::params::vdir}/${priority}-${name}-${docroot}":
     path => $docroot,
     ensure => directory,
   }
 
-  file {"${apache::params::vdir}/${priority}-${name}-$logroot":
+  file {"${apache::params::vdir}/${priority}-${name}-${logroot}":
     path => $logroot,
     ensure => directory,
   }
@@ -88,16 +88,16 @@ define apache::vhost(
       mode    => '0755',
       require => [
           Package['httpd'],
-          File["${apache::params::vdir}/${priority}-${name}-$docroot"],
-          File["${apache::params::vdir}/${priority}-${name}-$logroot"],
+          File["${apache::params::vdir}/${priority}-${name}-${docroot}"],
+          File["${apache::params::vdir}/${priority}-${name}-${logroot}"],
       ],
       notify  => Service['httpd'],
   }
 
   if $configure_firewall {
-    if ! defined(Firewall["0100-INPUT ACCEPT $port"]) {
+    if ! defined(Firewall["0100-INPUT ACCEPT ${port}"]) {
       @firewall {
-        "0100-INPUT ACCEPT $port":
+        "0100-INPUT ACCEPT ${port}":
           action => 'accept',
           dport  => $port,
           proto  => 'tcp'
