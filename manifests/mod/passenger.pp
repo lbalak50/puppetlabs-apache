@@ -17,7 +17,7 @@ class apache::mod::passenger {
 
   file { '/etc/apache2/mods-available/passenger.conf':
     ensure  => present,
-    source  => 'puppet:///apache/passenger.conf',
+    source  => 'puppet:///modules/apache/passenger.conf',
     require => Package['passenger']
   }
 
