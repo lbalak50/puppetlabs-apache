@@ -1,12 +1,15 @@
 class apache::mod::passenger {
-
   include apache::params
 
   include apache
 
   case $::operatingsystem {
-    'debian': { $passenger_package = 'libapache2-mod-passenger' }
-    default:  { notice "passenger package for ${::operatingsystem} undefined"}
+    'debian' : { 
+      $passenger_package = 'libapache2-mod-passenger'
+    }
+    default  : { 
+      fail "passenger package for ${::operatingsystem} undefined" 
+    }
   }
 
   package { 'passenger':
@@ -21,8 +24,6 @@ class apache::mod::passenger {
     require => Package['passenger']
   }
 
-  a2mod { 'passenger':
-    ensure => present;
-  }
+  a2mod { 'passenger': ensure => present; }
 
 }
