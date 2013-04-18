@@ -1,29 +1,5 @@
 class apache::mod::passenger {
-  include apache::params
+  include 'apache'
 
-  include apache
-
-  case $::operatingsystem {
-    'debian' : { 
-      $passenger_package = 'libapache2-mod-passenger'
-    }
-    default  : { 
-      fail "passenger package for ${::operatingsystem} undefined" 
-    }
-  }
-
-  package { 'passenger':
-    name    => $passenger_package,
-    ensure  => installed,
-    require => Package['httpd'];
-  }
-
-  file { '/etc/apache2/mods-available/passenger.conf':
-    ensure  => present,
-    source  => 'puppet:///modules/apache/passenger.conf',
-    require => Package['passenger']
-  }
-
-  a2mod { 'passenger': ensure => present; }
-
+  apache::mod { 'passenger': }
 }
