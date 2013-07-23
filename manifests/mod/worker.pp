@@ -27,6 +27,9 @@ class apache::mod::worker (
   file { "${apache::mod_dir}/worker.conf":
     ensure  => file,
     content => template('apache/mod/worker.conf.erb'),
+    require => Exec["mkdir ${apache::mod_dir}"],
+    before  => File[$apache::mod_dir],
+    notify  => Service['httpd'],
   }
 
   case $::osfamily {
@@ -41,12 +44,18 @@ class apache::mod::worker (
     }
     'debian': {
       file { "${apache::mod_enable_dir}/worker.conf":
-        ensure => link,
-        target => "${apache::mod_dir}/worker.conf",
+        ensure  => link,
+        target  => "${apache::mod_dir}/worker.conf",
+        require => Exec["mkdir ${apache::mod_enable_dir}"],
+        before  => File[$apache::mod_enable_dir],
+        notify  => Service['httpd'],
       }
       package { 'apache2-mpm-worker':
         ensure => present,
       }
+    }
+    default: {
+      fail("Unsupported osfamily ${::osfamily}")
     }
   }
 }
