@@ -19,14 +19,18 @@
 # Sample Usage:
 #
 class apache::params {
-  # This will be 5 or 6 on RedHat, 6 or wheezy on Debian, 12 or quantal on Ubuntu, etc.
+  # This will be 5 or 6 on RedHat, 6 or wheezy on Debian, 12 or quantal on Ubuntu, 3 on Amazon, etc.
   $osr_array = split($::operatingsystemrelease,'[\/\.]')
   $distrelease = $osr_array[0]
   if ! $distrelease {
     fail("Class['apache::params']: Unparsable \$::operatingsystemrelease: ${::operatingsystemrelease}")
   }
 
-  $servername = $::fqdn
+  if($::fqdn) {
+    $servername = $::fqdn
+  } else {
+    $servername = $::hostname
+  }
 
   if $::osfamily == 'RedHat' or $::operatingsystem == 'amazon' {
     $user                 = 'apache'
@@ -45,33 +49,39 @@ class apache::params {
     $dev_packages         = 'httpd-devel'
     $default_ssl_cert     = '/etc/pki/tls/certs/localhost.crt'
     $default_ssl_key      = '/etc/pki/tls/private/localhost.key'
-    $ssl_certs_dir        = $distrelease ? {
-      '5' => '/etc/pki/tls/certs',
-      '6' => '/etc/ssl/certs',
-    }
+    $ssl_certs_dir        = '/etc/pki/tls/certs'
     $passenger_root       = '/usr/share/rubygems/gems/passenger-3.0.17'
     $passenger_ruby       = '/usr/bin/ruby'
+    $suphp_addhandler     = 'php5-script'
+    $suphp_engine         = 'off'
+    $suphp_configpath     = undef
     $mod_packages         = {
-      'auth_kerb'  => 'mod_auth_kerb',
-      'fcgid'      => 'mod_fcgid',
-      'passenger'  => 'mod_passenger',
-      'perl'       => 'mod_perl',
-      'php5'       => $distrelease ? {
-        '5' => 'php53',
-        '6' => 'php',
+      'auth_kerb'   => 'mod_auth_kerb',
+      'authnz_ldap' => 'mod_authz_ldap',
+      'fastcgi'     => 'mod_fastcgi',
+      'fcgid'       => 'mod_fcgid',
+      'passenger'   => 'mod_passenger',
+      'perl'        => 'mod_perl',
+      'php5'        => $distrelease ? {
+        '5'     => 'php53',
+        default => 'php',
       },
-      'proxy_html' => 'mod_proxy_html',
-      'python'     => 'mod_python',
-      'shibboleth' => 'shibboleth',
-      'ssl'        => 'mod_ssl',
-      'wsgi'       => 'mod_wsgi',
-      'dav_svn'    => 'mod_dav_svn',
-      'xsendfile'  => 'mod_xsendfile',
+      'proxy_html'  => 'mod_proxy_html',
+      'python'      => 'mod_python',
+      'shibboleth'  => 'shibboleth',
+      'ssl'         => 'mod_ssl',
+      'wsgi'        => 'mod_wsgi',
+      'dav_svn'     => 'mod_dav_svn',
+      'suphp'       => 'mod_suphp',
+      'xsendfile'   => 'mod_xsendfile',
     }
     $mod_libs             = {
       'php5' => 'libphp5.so',
     }
     $conf_template        = 'apache/httpd.conf.erb'
+    $keepalive            = 'Off'
+    $keepalive_timeout    = 15
+    $fastcgi_lib_path     = undef
   } elsif $::osfamily == 'Debian' {
     $user             = 'www-data'
     $group            = 'www-data'
@@ -94,22 +104,31 @@ class apache::params {
     $ssl_certs_dir    = '/etc/ssl/certs'
     $passenger_root   = '/usr'
     $passenger_ruby   = '/usr/bin/ruby'
+    $suphp_addhandler  = 'x-httpd-php'
+    $suphp_engine      = 'off'
+    $suphp_configpath  = '/etc/php5/apache2'
     $mod_packages     = {
-      'auth_kerb'  => 'libapache2-mod-auth-kerb',
-      'fcgid'      => 'libapache2-mod-fcgid',
-      'passenger'  => 'libapache2-mod-passenger',
-      'perl'       => 'libapache2-mod-perl2',
-      'php5'       => 'libapache2-mod-php5',
-      'proxy_html' => 'libapache2-mod-proxy-html',
-      'python'     => 'libapache2-mod-python',
-      'wsgi'       => 'libapache2-mod-wsgi',
-      'dav_svn'    => 'libapache2-svn',
-      'xsendfile'  => 'libapache2-mod-xsendfile',
+      'auth_kerb'   => 'libapache2-mod-auth-kerb',
+      'authnz_ldap' => 'libapache2-mod-authz-ldap',
+      'fastcgi'     => 'libapache2-mod-fastcgi',
+      'fcgid'       => 'libapache2-mod-fcgid',
+      'passenger'   => 'libapache2-mod-passenger',
+      'perl'        => 'libapache2-mod-perl2',
+      'php5'        => 'libapache2-mod-php5',
+      'proxy_html'  => 'libapache2-mod-proxy-html',
+      'python'      => 'libapache2-mod-python',
+      'wsgi'        => 'libapache2-mod-wsgi',
+      'dav_svn'     => 'libapache2-svn',
+      'suphp'       => 'libapache2-mod-suphp',
+      'xsendfile'   => 'libapache2-mod-xsendfile',
     }
     $mod_libs         = {
       'php5' => 'libphp5.so',
     }
-    $conf_template    = 'apache/httpd.conf.erb'
+    $conf_template     = 'apache/httpd.conf.erb'
+    $keepalive         = 'Off'
+    $keepalive_timeout = 15
+    $fastcgi_lib_path  = '/var/lib/apache2/fastcgi'
   } else {
     fail("Class['apache::params']: Unsupported osfamily: ${::osfamily}")
   }
