@@ -24,8 +24,8 @@ describe 'apache::vhost', :type => :define do
       end
       let :params do default_params end
       let :facts do default_facts end
-      it { should include_class("apache") }
-      it { should include_class("apache::params") }
+      it { should contain_class("apache") }
+      it { should contain_class("apache::params") }
     end
     context "on Debian based systems" do
       let :default_facts do
@@ -37,8 +37,8 @@ describe 'apache::vhost', :type => :define do
       end
       let :params do default_params end
       let :facts do default_facts end
-      it { should include_class("apache") }
-      it { should include_class("apache::params") }
+      it { should contain_class("apache") }
+      it { should contain_class("apache::params") }
       it { should contain_file("25-rspec.example.com.conf").with(
         :ensure => 'present',
         :path   => '/etc/apache2/sites-available/25-rspec.example.com.conf'
@@ -59,8 +59,8 @@ describe 'apache::vhost', :type => :define do
       end
       let :params do default_params end
       let :facts do default_facts end
-      it { should include_class("apache") }
-      it { should include_class("apache::params") }
+      it { should contain_class("apache") }
+      it { should contain_class("apache::params") }
       it { should contain_file("25-rspec.example.com.conf").with(
         :ensure => 'present',
         :path   => '/usr/local/etc/apache22/Vhosts/25-rspec.example.com.conf'
@@ -77,8 +77,8 @@ describe 'apache::vhost', :type => :define do
     end
     describe 'basic assumptions' do
       let :params do default_params end
-      it { should include_class("apache") }
-      it { should include_class("apache::params") }
+      it { should contain_class("apache") }
+      it { should contain_class("apache::params") }
       it { should contain_apache__listen(params[:port]) }
       it { should contain_apache__namevirtualhost("*:#{params[:port]}") }
     end
@@ -719,6 +719,12 @@ describe 'apache::vhost', :type => :define do
           :match => [
             /^  VirtualDocumentRoot \/not\/default$/,
           ],
+        },
+        {
+          :title => 'should contain environment variables',
+          :attr  => 'access_log_env_var',
+          :value => 'admin',
+          :match => [/CustomLog \/var\/log\/.+_access\.log combined env=admin$/]
         },
 
       ].each do |param|

@@ -393,6 +393,7 @@ There are many `apache::mod::[name]` classes within this module that can be decl
 * `fastcgi`
 * `fcgid`
 * `headers`
+* `include`
 * `info`
 * `itk`
 * `ldap`
@@ -487,6 +488,10 @@ Sends all access log messages to syslog. Defaults to 'undef'.
 #####`access_log_format`
 
 Specifies either a LogFormat nickname or custom format string for access log. Defaults to 'undef'.
+
+#####`access_log_env_var`
+
+Adds writing control of access log via environment variable of the access. Defaults to 'undef'.
 
 #####`add_listen`
 
