@@ -42,7 +42,8 @@ define apache::balancer (
   $proxy_set = {},
   $collect_exported = true,
 ) {
-  include apache::mod::proxy_balancer
+  include concat::setup
+  include ::apache::mod::proxy_balancer
 
   $target = "${::apache::params::confd_dir}/balancer_${name}.conf"
 
@@ -54,6 +55,7 @@ define apache::balancer (
   }
 
   concat::fragment { "00-${name}-header":
+    ensure  => present,
     target  => $target,
     order   => '01',
     content => "<Proxy balancer://${name}>\n",
@@ -66,12 +68,14 @@ define apache::balancer (
   # concat fragments. We don't have to do anything about them.
 
   concat::fragment { "01-${name}-proxyset":
+    ensure  => present,
     target  => $target,
     order   => '19',
     content => inline_template("<% proxy_set.each do |key, value| %> Proxyset <%= key %>=<%= value %>\n<% end %>"),
   }
 
   concat::fragment { "01-${name}-footer":
+    ensure  => present,
     target  => $target,
     order   => '20',
     content => "</Proxy>\n",
